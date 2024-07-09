@@ -153,6 +153,8 @@ pub struct GltfLoaderSettings {
     pub load_lights: bool,
     /// If true, the loader will include the root of the gltf root node.
     pub include_source: bool,
+    /// If true, textures will be loaded relative to the assets root folder (rather than the gltf file itself).
+    pub root_texture_paths: bool,
 }
 
 impl Default for GltfLoaderSettings {
@@ -163,6 +165,7 @@ impl Default for GltfLoaderSettings {
             load_cameras: true,
             load_lights: true,
             include_source: false,
+            root_texture_paths: false,
         }
     }
 }
@@ -383,6 +386,7 @@ async fn load_gltf<'a, 'b, 'c>(
                 parent_path,
                 loader.supported_compressed_formats,
                 settings.load_materials,
+                settings.root_texture_paths,
             )
             .await?;
             process_loaded_texture(load_context, &mut _texture_handles, image);
@@ -403,6 +407,7 @@ async fn load_gltf<'a, 'b, 'c>(
                             parent_path,
                             loader.supported_compressed_formats,
                             settings.load_materials,
+                            settings.root_texture_paths,
                         )
                         .await
                     });
@@ -425,7 +430,7 @@ async fn load_gltf<'a, 'b, 'c>(
     if !settings.load_materials.is_empty() {
         // NOTE: materials must be loaded after textures because image load() calls will happen before load_with_settings, preventing is_srgb from being set properly
         for material in gltf.materials() {
-            let handle = load_material(&material, load_context, &gltf.document, false);
+            let handle = load_material(&material, load_context, &gltf.document, false, settings.root_texture_paths);
             if let Some(name) = material.name() {
                 named_materials.insert(name.into(), handle.clone());
             }
@@ -809,6 +814,7 @@ async fn load_image<'a, 'b>(
     parent_path: &'b Path,
     supported_compressed_formats: CompressedImageFormats,
     render_asset_usages: RenderAssetUsages,
+    root_texture_paths: bool,
 ) -> Result<ImageOrPath, GltfError> {
     let is_srgb = !linear_textures.contains(&gltf_texture.index());
     let sampler_descriptor = texture_sampler(&gltf_texture);
@@ -858,7 +864,11 @@ async fn load_image<'a, 'b>(
                     label: GltfAssetLabel::Texture(gltf_texture.index()),
                 })
             } else {
-                let image_path = parent_path.join(uri);
+                let image_path = if root_texture_paths {
+                    PathBuf::from(uri)
+                } else {
+                    parent_path.join(uri)
+                };
                 Ok(ImageOrPath::Path {
                     path: image_path,
                     is_srgb,
@@ -875,6 +885,7 @@ fn load_material(
     load_context: &mut LoadContext,
     document: &Document,
     is_scale_inverted: bool,
+    root_texture_paths: bool,
 ) -> Handle<StandardMaterial> {
     let material_label = material_label(material, is_scale_inverted);
     load_context.labeled_asset_scope(material_label, |load_context| {
@@ -888,7 +899,7 @@ fn load_material(
             .unwrap_or_default();
         let base_color_texture = pbr
             .base_color_texture()
-            .map(|info| texture_handle(load_context, &info.texture()));
+            .map(|info| texture_handle(load_context, &info.texture(), root_texture_paths));
 
         let uv_transform = pbr
             .base_color_texture()
@@ -905,7 +916,7 @@ fn load_material(
         let normal_map_texture: Option<Handle<Image>> =
             material.normal_texture().map(|normal_texture| {
                 // TODO: handle normal_texture.scale
-                texture_handle(load_context, &normal_texture.texture())
+                texture_handle(load_context, &normal_texture.texture(), root_texture_paths)
             });
 
         let metallic_roughness_channel = pbr
@@ -919,7 +930,7 @@ fn load_material(
                 uv_transform,
                 "metallic/roughness",
             );
-            texture_handle(load_context, &info.texture())
+            texture_handle(load_context, &info.texture(), root_texture_paths)
         });
 
         let occlusion_channel = material
@@ -928,7 +939,7 @@ fn load_material(
             .unwrap_or_default();
         let occlusion_texture = material.occlusion_texture().map(|occlusion_texture| {
             // TODO: handle occlusion_texture.strength() (a scalar multiplier for occlusion strength)
-            texture_handle(load_context, &occlusion_texture.texture())
+            texture_handle(load_context, &occlusion_texture.texture(), root_texture_paths)
         });
 
         let emissive = material.emissive_factor();
@@ -939,7 +950,7 @@ fn load_material(
         let emissive_texture = material.emissive_texture().map(|info| {
             // TODO: handle occlusion_texture.strength() (a scalar multiplier for occlusion strength)
             warn_on_differing_texture_transforms(material, &info, uv_transform, "emissive");
-            texture_handle(load_context, &info.texture())
+            texture_handle(load_context, &info.texture(), root_texture_paths)
         });
 
         #[cfg(feature = "pbr_transmission_textures")]
@@ -956,7 +967,7 @@ fn load_material(
                     let transmission_texture: Option<Handle<Image>> = transmission
                         .transmission_texture()
                         .map(|transmission_texture| {
-                            texture_handle(load_context, &transmission_texture.texture())
+                            texture_handle(load_context, &transmission_texture.texture(), root_texture_paths)
                         });
 
                     (
@@ -987,7 +998,7 @@ fn load_material(
                     .unwrap_or_default();
                 let thickness_texture: Option<Handle<Image>> =
                     volume.thickness_texture().map(|thickness_texture| {
-                        texture_handle(load_context, &thickness_texture.texture())
+                        texture_handle(load_context, &thickness_texture.texture(), root_texture_paths)
                     });
 
                 (
@@ -1279,7 +1290,7 @@ fn load_node(
                     if !root_load_context.has_labeled_asset(&material_label)
                         && !load_context.has_labeled_asset(&material_label)
                     {
-                        load_material(&material, load_context, document, is_scale_inverted);
+                        load_material(&material, load_context, document, is_scale_inverted, settings.root_texture_paths);
                     }
 
                     let primitive_label = GltfAssetLabel::Primitive {
@@ -1490,7 +1501,7 @@ fn material_label(material: &Material, is_scale_inverted: bool) -> String {
     }
 }
 
-fn texture_handle(load_context: &mut LoadContext, texture: &gltf::Texture) -> Handle<Image> {
+fn texture_handle(load_context: &mut LoadContext, texture: &gltf::Texture, root_texture_paths: bool) -> Handle<Image> {
     match texture.source().source() {
         Source::View { .. } => {
             load_context.get_label_handle(GltfAssetLabel::Texture(texture.index()).to_string())
@@ -1503,8 +1514,11 @@ fn texture_handle(load_context: &mut LoadContext, texture: &gltf::Texture) -> Ha
             if let Ok(_data_uri) = DataUri::parse(uri) {
                 load_context.get_label_handle(GltfAssetLabel::Texture(texture.index()).to_string())
             } else {
-                let parent = load_context.path().parent().unwrap();
-                let image_path = parent.join(uri);
+                let image_path = if root_texture_paths {
+                    PathBuf::from(uri)
+                } else {
+                    load_context.path().parent().unwrap().join(uri)
+                };
                 load_context.load(image_path)
             }
         }
@@ -1521,12 +1535,13 @@ fn texture_handle_from_info(
     load_context: &mut LoadContext,
     document: &Document,
     texture_info: &json::texture::Info,
+    root_texture_paths: bool,
 ) -> Handle<Image> {
     let texture = document
         .textures()
         .nth(texture_info.index.value())
         .expect("Texture info references a nonexistent texture");
-    texture_handle(load_context, &texture)
+    texture_handle(load_context, &texture, root_texture_paths)
 }
 
 /// Returns the label for the `scene`.
