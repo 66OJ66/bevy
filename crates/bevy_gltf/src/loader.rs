@@ -379,7 +379,7 @@ async fn load_gltf<'a, 'b, 'c>(
     if gltf.textures().len() == 1 || cfg!(target_arch = "wasm32") {
         for texture in gltf.textures() {
             let parent_path = load_context.path().parent().unwrap();
-            debug!("Texture parent path: {:?}", parent_path);
+            warn!("Texture parent path: {:?}", parent_path);
             let image = load_image(
                 texture,
                 &buffer_data,
