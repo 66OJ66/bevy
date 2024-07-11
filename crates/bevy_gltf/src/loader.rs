@@ -211,6 +211,8 @@ async fn load_gltf<'a, 'b, 'c>(
 
     if settings.root_texture_paths {
         warn!("Using root texture paths for {}", file_name);
+    } else {
+        warn!("Using relative texture paths for {}", file_name);
     }
 
     let mut linear_textures = HashSet::default();
