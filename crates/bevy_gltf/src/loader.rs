@@ -439,7 +439,6 @@ async fn load_gltf<'a, 'b, 'c>(
                 settings.root_texture_paths,
             );
             if let Some(name) = material.name() {
-                warn!("Material name: {}", name);
                 named_materials.insert(name.into(), handle.clone());
             }
             materials.push(handle);
