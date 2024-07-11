@@ -197,6 +197,7 @@ async fn load_gltf<'a, 'b, 'c>(
     load_context: &'b mut LoadContext<'c>,
     settings: &'b GltfLoaderSettings,
 ) -> Result<Gltf, GltfError> {
+    let gltf = gltf::Gltf::from_slice(bytes)?;
     let file_name = load_context
         .asset_path()
         .path()
@@ -206,27 +207,12 @@ async fn load_gltf<'a, 'b, 'c>(
             "Gltf file name invalid",
         ))))?
         .to_string();
+    let buffer_data = load_buffers(&gltf, load_context).await?;
 
     if settings.root_texture_paths {
         warn!("Using root texture paths for {}", file_name);
     } else {
         warn!("Using relative texture paths for {}", file_name);
-    }
-
-    let gltf = gltf::Gltf::from_slice(bytes)?;
-
-    if settings.root_texture_paths {
-        warn!("{} loaded gLTF fine (root)", file_name);
-    } else {
-        warn!("{} loaded gLTF fine (relative)", file_name);
-    }
-
-    let buffer_data = load_buffers(&gltf, load_context).await?;
-
-    if settings.root_texture_paths {
-        warn!("{} loaded buffers fine (root)", file_name);
-    } else {
-        warn!("{} loaded buffers fine (relative)", file_name);
     }
 
     let mut linear_textures = HashSet::default();
