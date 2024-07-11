@@ -430,13 +430,7 @@ async fn load_gltf<'a, 'b, 'c>(
     if !settings.load_materials.is_empty() {
         // NOTE: materials must be loaded after textures because image load() calls will happen before load_with_settings, preventing is_srgb from being set properly
         for material in gltf.materials() {
-            let handle = load_material(
-                &material,
-                load_context,
-                &gltf.document,
-                false,
-                settings.root_texture_paths,
-            );
+            let handle = load_material(&material, load_context, &gltf.document, false, settings.root_texture_paths);
             if let Some(name) = material.name() {
                 named_materials.insert(name.into(), handle.clone());
             }
@@ -947,11 +941,7 @@ fn load_material(
             .unwrap_or_default();
         let occlusion_texture = material.occlusion_texture().map(|occlusion_texture| {
             // TODO: handle occlusion_texture.strength() (a scalar multiplier for occlusion strength)
-            texture_handle(
-                load_context,
-                &occlusion_texture.texture(),
-                root_texture_paths,
-            )
+            texture_handle(load_context, &occlusion_texture.texture(), root_texture_paths)
         });
 
         let emissive = material.emissive_factor();
@@ -979,11 +969,7 @@ fn load_material(
                     let transmission_texture: Option<Handle<Image>> = transmission
                         .transmission_texture()
                         .map(|transmission_texture| {
-                            texture_handle(
-                                load_context,
-                                &transmission_texture.texture(),
-                                root_texture_paths,
-                            )
+                            texture_handle(load_context, &transmission_texture.texture(), root_texture_paths)
                         });
 
                     (
@@ -1014,11 +1000,7 @@ fn load_material(
                     .unwrap_or_default();
                 let thickness_texture: Option<Handle<Image>> =
                     volume.thickness_texture().map(|thickness_texture| {
-                        texture_handle(
-                            load_context,
-                            &thickness_texture.texture(),
-                            root_texture_paths,
-                        )
+                        texture_handle(load_context, &thickness_texture.texture(), root_texture_paths)
                     });
 
                 (
@@ -1310,13 +1292,7 @@ fn load_node(
                     if !root_load_context.has_labeled_asset(&material_label)
                         && !load_context.has_labeled_asset(&material_label)
                     {
-                        load_material(
-                            &material,
-                            load_context,
-                            document,
-                            is_scale_inverted,
-                            settings.root_texture_paths,
-                        );
+                        load_material(&material, load_context, document, is_scale_inverted, settings.root_texture_paths);
                     }
 
                     let primitive_label = GltfAssetLabel::Primitive {
@@ -1527,11 +1503,7 @@ fn material_label(material: &Material, is_scale_inverted: bool) -> String {
     }
 }
 
-fn texture_handle(
-    load_context: &mut LoadContext,
-    texture: &gltf::Texture,
-    root_texture_paths: bool,
-) -> Handle<Image> {
+fn texture_handle(load_context: &mut LoadContext, texture: &gltf::Texture, root_texture_paths: bool) -> Handle<Image> {
     match texture.source().source() {
         Source::View { .. } => {
             load_context.get_label_handle(GltfAssetLabel::Texture(texture.index()).to_string())
@@ -1545,9 +1517,7 @@ fn texture_handle(
                 load_context.get_label_handle(GltfAssetLabel::Texture(texture.index()).to_string())
             } else {
                 let image_path = if root_texture_paths {
-                    let path = PathBuf::from(uri);
-                    warn!("Texture handle path: {:?}", path);
-                    path
+                    PathBuf::from(uri)
                 } else {
                     load_context.path().parent().unwrap().join(uri)
                 };
@@ -1683,7 +1653,6 @@ async fn load_buffers(
                     Err(()) => {
                         // TODO: Remove this and add dep
                         let buffer_path = load_context.path().parent().unwrap().join(uri);
-                        warn!("Buffer path: {:?}", buffer_path);
                         load_context.read_asset_bytes(buffer_path).await?
                     }
                 };
