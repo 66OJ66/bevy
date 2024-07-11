@@ -209,6 +209,10 @@ async fn load_gltf<'a, 'b, 'c>(
         .to_string();
     let buffer_data = load_buffers(&gltf, load_context).await?;
 
+    if settings.root_texture_paths {
+        warn!("Using root texture paths for {}", file_name);
+    }
+
     let mut linear_textures = HashSet::default();
 
     for material in gltf.materials() {
