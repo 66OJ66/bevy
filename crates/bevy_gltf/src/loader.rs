@@ -865,9 +865,7 @@ async fn load_image<'a, 'b>(
                 })
             } else {
                 let image_path = if root_texture_paths {
-                    let path = PathBuf::from(uri);
-                    warn!("Image path: {}", path);
-                    path
+                    PathBuf::from(uri)
                 } else {
                     parent_path.join(uri)
                 };
