@@ -398,7 +398,6 @@ async fn load_gltf<'a, 'b, 'c>(
             .scope(|scope| {
                 gltf.textures().for_each(|gltf_texture| {
                     let parent_path = load_context.path().parent().unwrap();
-                    warn!("Texture parent path: {:?}", parent_path);
                     let linear_textures = &linear_textures;
                     let buffer_data = &buffer_data;
                     scope.spawn(async move {
