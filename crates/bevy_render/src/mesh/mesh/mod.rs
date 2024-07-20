@@ -22,6 +22,7 @@ use bevy_math::*;
 use bevy_reflect::Reflect;
 use bevy_utils::tracing::{error, warn};
 use bytemuck::cast_slice;
+use std::cmp::Ordering;
 use std::{collections::BTreeMap, hash::Hash, iter::FusedIterator};
 use thiserror::Error;
 use wgpu::{
@@ -128,7 +129,7 @@ pub struct Mesh {
     /// Uses a [`BTreeMap`] because, unlike `HashMap`, it has a defined iteration order,
     /// which allows easy stable `VertexBuffers` (i.e. same buffer order)
     #[reflect(ignore)]
-    attributes: BTreeMap<MeshVertexAttributeId, MeshAttributeData>,
+    attributes: BTreeMap<MeshVertexAttribute, MeshAttributeData>,
     indices: Option<Indices>,
     morph_targets: Option<Handle<Image>>,
     morph_target_names: Option<Vec<String>>,
@@ -248,7 +249,7 @@ impl Mesh {
         }
 
         self.attributes
-            .insert(attribute.id, MeshAttributeData { attribute, values });
+            .insert(attribute, MeshAttributeData { attribute, values });
     }
 
     /// Consumes the mesh and returns a mesh with data set for a vertex attribute (position, normal, etc.).
@@ -276,9 +277,13 @@ impl Mesh {
         &mut self,
         attribute: impl Into<MeshVertexAttributeId>,
     ) -> Option<VertexAttributeValues> {
-        self.attributes
-            .remove(&attribute.into())
-            .map(|data| data.values)
+        let id = attribute.into();
+
+        if let Some(value) = self.attributes.keys().find(|a| a.id == id).copied() {
+            self.attributes.remove(&value).map(|data| data.values)
+        } else {
+            None
+        }
     }
 
     /// Consumes the mesh and returns a mesh without the data for a vertex attribute
@@ -292,7 +297,8 @@ impl Mesh {
 
     #[inline]
     pub fn contains_attribute(&self, id: impl Into<MeshVertexAttributeId>) -> bool {
-        self.attributes.contains_key(&id.into())
+        let id = id.into();
+        self.attributes.keys().any(|a| a.id == id)
     }
 
     /// Retrieves the data currently set to the vertex attribute with the specified `name`.
@@ -301,7 +307,12 @@ impl Mesh {
         &self,
         id: impl Into<MeshVertexAttributeId>,
     ) -> Option<&VertexAttributeValues> {
-        self.attributes.get(&id.into()).map(|data| &data.values)
+        let id = id.into();
+
+        self.attributes
+            .iter()
+            .find(|(key, _)| key.id == id)
+            .map(|(_, data)| &data.values)
     }
 
     /// Retrieves the data currently set to the vertex attribute with the specified `name` mutably.
@@ -310,22 +321,25 @@ impl Mesh {
         &mut self,
         id: impl Into<MeshVertexAttributeId>,
     ) -> Option<&mut VertexAttributeValues> {
+        let id = id.into();
+
         self.attributes
-            .get_mut(&id.into())
-            .map(|data| &mut data.values)
+            .iter_mut()
+            .find(|(key, _)| key.id == id)
+            .map(|(_, data)| &mut data.values)
     }
 
     /// Returns an iterator that yields references to the data of each vertex attribute.
     pub fn attributes(
         &self,
-    ) -> impl Iterator<Item = (MeshVertexAttributeId, &VertexAttributeValues)> {
+    ) -> impl Iterator<Item = (MeshVertexAttribute, &VertexAttributeValues)> {
         self.attributes.iter().map(|(id, data)| (*id, &data.values))
     }
 
     /// Returns an iterator that yields mutable references to the data of each vertex attribute.
     pub fn attributes_mut(
         &mut self,
-    ) -> impl Iterator<Item = (MeshVertexAttributeId, &mut VertexAttributeValues)> {
+    ) -> impl Iterator<Item = (MeshVertexAttribute, &mut VertexAttributeValues)> {
         self.attributes
             .iter_mut()
             .map(|(id, data)| (*id, &mut data.values))
@@ -1086,7 +1100,7 @@ impl core::ops::Mul<Mesh> for Transform {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Copy, Clone)]
 pub struct MeshVertexAttribute {
     /// The friendly name of the vertex attribute
     pub name: &'static str,
@@ -1098,6 +1112,26 @@ pub struct MeshVertexAttribute {
 
     /// The format of the vertex attribute.
     pub format: VertexFormat,
+}
+
+impl PartialEq for MeshVertexAttribute {
+    fn eq(&self, other: &Self) -> bool {
+        self.id == other.id
+    }
+}
+
+impl Eq for MeshVertexAttribute {}
+
+impl Ord for MeshVertexAttribute {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.id.cmp(&other.id)
+    }
+}
+
+impl PartialOrd for MeshVertexAttribute {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
 }
 
 impl MeshVertexAttribute {
