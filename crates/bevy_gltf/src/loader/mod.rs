@@ -956,7 +956,7 @@ async fn load_image<'a, 'b>(
     gltf_texture: gltf::Texture<'a>,
     buffer_data: &[Vec<u8>],
     linear_textures: &HashSet<usize>,
-    parent_path: &'b Path,
+    _parent_path: &'b Path,
     supported_compressed_formats: CompressedImageFormats,
     render_asset_usages: RenderAssetUsages,
 ) -> Result<ImageOrPath, GltfError> {
@@ -1008,7 +1008,7 @@ async fn load_image<'a, 'b>(
                     label: GltfAssetLabel::Texture(gltf_texture.index()),
                 })
             } else {
-                let image_path = parent_path.join(uri);
+                let image_path = PathBuf::from(uri);
                 Ok(ImageOrPath::Path {
                     path: image_path,
                     is_srgb,
