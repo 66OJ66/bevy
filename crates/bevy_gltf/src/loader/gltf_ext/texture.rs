@@ -1,6 +1,7 @@
 use bevy_asset::{Handle, LoadContext};
 use bevy_image::{Image, ImageAddressMode, ImageFilterMode, ImageSamplerDescriptor};
 use bevy_math::Affine2;
+use std::path::PathBuf;
 
 use gltf::{
     image::Source,
@@ -30,8 +31,7 @@ pub(crate) fn texture_handle(
             if let Ok(_data_uri) = DataUri::parse(uri) {
                 load_context.get_label_handle(texture_label(texture).to_string())
             } else {
-                let parent = load_context.path().parent().unwrap();
-                let image_path = parent.join(uri);
+                let image_path = PathBuf::from(uri);
                 load_context.load(image_path)
             }
         }
