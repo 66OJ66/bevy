@@ -1009,6 +1009,7 @@ async fn load_image<'a, 'b>(
                 })
             } else {
                 let image_path = PathBuf::from(uri);
+                println!("Image path: {image_path:?}");
                 Ok(ImageOrPath::Path {
                     path: image_path,
                     is_srgb,
