@@ -347,6 +347,7 @@ pub struct Node {
     ///   - [`Display::None`]: Hide this node and perform layout as if it does not exist.
     ///
     /// <https://developer.mozilla.org/en-US/docs/Web/CSS/display>
+    #[cfg_attr(feature = "serialize", serde(default))]
     pub display: Display,
 
     /// Which part of a Node's box length styles like width and height control
@@ -356,6 +357,7 @@ pub struct Node {
     /// `BoxSizing::BorderBox` is generally considered more intuitive and is the default in Bevy even though it is not on the web.
     ///
     /// See: <https://developer.mozilla.org/en-US/docs/Web/CSS/box-sizing>
+    #[cfg_attr(feature = "serialize", serde(default))]
     pub box_sizing: BoxSizing,
 
     /// Whether a node should be laid out in-flow with, or independently of its siblings:
@@ -363,16 +365,19 @@ pub struct Node {
     ///  - [`PositionType::Absolute`]: Layout this node on top and independently of other nodes.
     ///
     /// <https://developer.mozilla.org/en-US/docs/Web/CSS/position>
+    #[cfg_attr(feature = "serialize", serde(default))]
     pub position_type: PositionType,
 
     /// Whether overflowing content should be displayed or clipped.
     ///
     /// <https://developer.mozilla.org/en-US/docs/Web/CSS/overflow>
+    #[cfg_attr(feature = "serialize", serde(default))]
     pub overflow: Overflow,
 
     /// How the bounds of clipped content should be determined
     ///
     /// <https://developer.mozilla.org/en-US/docs/Web/CSS/overflow-clip-margin>
+    #[cfg_attr(feature = "serialize", serde(default))]
     pub overflow_clip_margin: OverflowClipMargin,
 
     /// The horizontal position of the left edge of the node.
@@ -380,6 +385,7 @@ pub struct Node {
     ///  - For absolutely positioned nodes, this is relative to the *parent* node's bounding box.
     ///
     /// <https://developer.mozilla.org/en-US/docs/Web/CSS/left>
+    #[cfg_attr(feature = "serialize", serde(default))]
     pub left: Val,
 
     /// The horizontal position of the right edge of the node.
@@ -387,6 +393,7 @@ pub struct Node {
     ///  - For absolutely positioned nodes, this is relative to the *parent* node's bounding box.
     ///
     /// <https://developer.mozilla.org/en-US/docs/Web/CSS/right>
+    #[cfg_attr(feature = "serialize", serde(default))]
     pub right: Val,
 
     /// The vertical position of the top edge of the node.
@@ -394,6 +401,7 @@ pub struct Node {
     ///  - For absolutely positioned nodes, this is relative to the *parent* node's bounding box.
     ///
     /// <https://developer.mozilla.org/en-US/docs/Web/CSS/top>
+    #[cfg_attr(feature = "serialize", serde(default))]
     pub top: Val,
 
     /// The vertical position of the bottom edge of the node.
@@ -401,41 +409,49 @@ pub struct Node {
     ///  - For absolutely positioned nodes, this is relative to the *parent* node's bounding box.
     ///
     /// <https://developer.mozilla.org/en-US/docs/Web/CSS/bottom>
+    #[cfg_attr(feature = "serialize", serde(default))]
     pub bottom: Val,
 
     /// The ideal width of the node. `width` is used when it is within the bounds defined by `min_width` and `max_width`.
     ///
     /// <https://developer.mozilla.org/en-US/docs/Web/CSS/width>
+    #[cfg_attr(feature = "serialize", serde(default))]
     pub width: Val,
 
     /// The ideal height of the node. `height` is used when it is within the bounds defined by `min_height` and `max_height`.
     ///
     /// <https://developer.mozilla.org/en-US/docs/Web/CSS/height>
+    #[cfg_attr(feature = "serialize", serde(default))]
     pub height: Val,
 
     /// The minimum width of the node. `min_width` is used if it is greater than `width` and/or `max_width`.
     ///
     /// <https://developer.mozilla.org/en-US/docs/Web/CSS/min-width>
+    #[cfg_attr(feature = "serialize", serde(default))]
     pub min_width: Val,
 
     /// The minimum height of the node. `min_height` is used if it is greater than `height` and/or `max_height`.
     ///
     /// <https://developer.mozilla.org/en-US/docs/Web/CSS/min-height>
+    #[cfg_attr(feature = "serialize", serde(default))]
     pub min_height: Val,
 
     /// The maximum width of the node. `max_width` is used if it is within the bounds defined by `min_width` and `width`.
     ///
     /// <https://developer.mozilla.org/en-US/docs/Web/CSS/max-width>
+    #[cfg_attr(feature = "serialize", serde(default))]
     pub max_width: Val,
 
     /// The maximum height of the node. `max_height` is used if it is within the bounds defined by `min_height` and `height`.
     ///
     /// <https://developer.mozilla.org/en-US/docs/Web/CSS/max-height>
+    #[cfg_attr(feature = "serialize", serde(default))]
     pub max_height: Val,
 
     /// The aspect ratio of the node (defined as `width / height`)
     ///
     /// <https://developer.mozilla.org/en-US/docs/Web/CSS/aspect-ratio>
+    #[cfg_attr(feature = "serialize", serde(default))]
     pub aspect_ratio: Option<f32>,
 
     /// Used to control how each individual item is aligned by default within the space they're given.
@@ -445,6 +461,7 @@ pub struct Node {
     /// This value is overridden if [`AlignSelf`] on the child node is set.
     ///
     /// <https://developer.mozilla.org/en-US/docs/Web/CSS/align-items>
+    #[cfg_attr(feature = "serialize", serde(default))]
     pub align_items: AlignItems,
 
     /// Used to control how each individual item is aligned by default within the space they're given.
@@ -454,6 +471,7 @@ pub struct Node {
     /// This value is overridden if [`JustifySelf`] on the child node is set.
     ///
     /// <https://developer.mozilla.org/en-US/docs/Web/CSS/justify-items>
+    #[cfg_attr(feature = "serialize", serde(default))]
     pub justify_items: JustifyItems,
 
     /// Used to control how the specified item is aligned within the space it's given.
@@ -463,6 +481,7 @@ pub struct Node {
     /// If set to `Auto`, alignment is inherited from the value of [`AlignItems`] set on the parent node.
     ///
     /// <https://developer.mozilla.org/en-US/docs/Web/CSS/align-self>
+    #[cfg_attr(feature = "serialize", serde(default))]
     pub align_self: AlignSelf,
 
     /// Used to control how the specified item is aligned within the space it's given.
@@ -472,6 +491,7 @@ pub struct Node {
     /// If set to `Auto`, alignment is inherited from the value of [`JustifyItems`] set on the parent node.
     ///
     /// <https://developer.mozilla.org/en-US/docs/Web/CSS/justify-self>
+    #[cfg_attr(feature = "serialize", serde(default))]
     pub justify_self: JustifySelf,
 
     /// Used to control how items are distributed.
@@ -479,6 +499,7 @@ pub struct Node {
     /// - For CSS Grid containers, controls alignment of grid rows.
     ///
     /// <https://developer.mozilla.org/en-US/docs/Web/CSS/align-content>
+    #[cfg_attr(feature = "serialize", serde(default))]
     pub align_content: AlignContent,
 
     /// Used to control how items are distributed.
@@ -486,6 +507,7 @@ pub struct Node {
     /// - For CSS Grid containers, controls alignment of grid columns.
     ///
     /// <https://developer.mozilla.org/en-US/docs/Web/CSS/justify-content>
+    #[cfg_attr(feature = "serialize", serde(default))]
     pub justify_content: JustifyContent,
 
     /// The amount of space around a node outside its border.
@@ -508,6 +530,7 @@ pub struct Node {
     /// A node with this style and a parent with dimensions of 100px by 300px will have calculated margins of 10px on both left and right edges, and 15px on both top and bottom edges.
     ///
     /// <https://developer.mozilla.org/en-US/docs/Web/CSS/margin>
+    #[cfg_attr(feature = "serialize", serde(default))]
     pub margin: UiRect,
 
     /// The amount of space between the edges of a node and its contents.
@@ -530,6 +553,7 @@ pub struct Node {
     /// A node with this style and a parent with dimensions of 300px by 100px will have calculated padding of 3px on the left, 6px on the right, 9px on the top and 12px on the bottom.
     ///
     /// <https://developer.mozilla.org/en-US/docs/Web/CSS/padding>
+    #[cfg_attr(feature = "serialize", serde(default))]
     pub padding: UiRect,
 
     /// The amount of space between the margins of a node and its padding.
@@ -539,26 +563,31 @@ pub struct Node {
     /// The size of the node will be expanded if there are constraints that prevent the layout algorithm from placing the border within the existing node boundary.
     ///
     /// <https://developer.mozilla.org/en-US/docs/Web/CSS/border-width>
+    #[cfg_attr(feature = "serialize", serde(default))]
     pub border: UiRect,
 
     /// Whether a Flexbox container should be a row or a column. This property has no effect on Grid nodes.
     ///
     /// <https://developer.mozilla.org/en-US/docs/Web/CSS/flex-direction>
+    #[cfg_attr(feature = "serialize", serde(default))]
     pub flex_direction: FlexDirection,
 
     /// Whether a Flexbox container should wrap its contents onto multiple lines if they overflow. This property has no effect on Grid nodes.
     ///
     /// <https://developer.mozilla.org/en-US/docs/Web/CSS/flex-wrap>
+    #[cfg_attr(feature = "serialize", serde(default))]
     pub flex_wrap: FlexWrap,
 
     /// Defines how much a flexbox item should grow if there's space available. Defaults to 0 (don't grow at all).
     ///
     /// <https://developer.mozilla.org/en-US/docs/Web/CSS/flex-grow>
+    #[cfg_attr(feature = "serialize", serde(default))]
     pub flex_grow: f32,
 
     /// Defines how much a flexbox item should shrink if there's not enough space available. Defaults to 1.
     ///
     /// <https://developer.mozilla.org/en-US/docs/Web/CSS/flex-shrink>
+    #[cfg_attr(feature = "serialize", serde(default))]
     pub flex_shrink: f32,
 
     /// The initial length of a flexbox in the main axis, before flex growing/shrinking properties are applied.
@@ -566,6 +595,7 @@ pub struct Node {
     /// `flex_basis` overrides `width` (if the main axis is horizontal) or `height` (if the main axis is vertical) when both are set, but it obeys the constraints defined by `min_width`/`min_height` and `max_width`/`max_height`.
     ///
     /// <https://developer.mozilla.org/en-US/docs/Web/CSS/flex-basis>
+    #[cfg_attr(feature = "serialize", serde(default))]
     pub flex_basis: Val,
 
     /// The size of the gutters between items in a vertical flexbox layout or between rows in a grid layout.
@@ -573,6 +603,7 @@ pub struct Node {
     /// Note: Values of `Val::Auto` are not valid and are treated as zero.
     ///
     /// <https://developer.mozilla.org/en-US/docs/Web/CSS/row-gap>
+    #[cfg_attr(feature = "serialize", serde(default))]
     pub row_gap: Val,
 
     /// The size of the gutters between items in a horizontal flexbox layout or between column in a grid layout.
@@ -580,45 +611,53 @@ pub struct Node {
     /// Note: Values of `Val::Auto` are not valid and are treated as zero.
     ///
     /// <https://developer.mozilla.org/en-US/docs/Web/CSS/column-gap>
+    #[cfg_attr(feature = "serialize", serde(default))]
     pub column_gap: Val,
 
     /// Controls whether automatically placed grid items are placed row-wise or column-wise as well as whether the sparse or dense packing algorithm is used.
     /// Only affects Grid layouts.
     ///
     /// <https://developer.mozilla.org/en-US/docs/Web/CSS/grid-auto-flow>
+    #[cfg_attr(feature = "serialize", serde(default))]
     pub grid_auto_flow: GridAutoFlow,
 
     /// Defines the number of rows a grid has and the sizes of those rows. If grid items are given explicit placements then more rows may
     /// be implicitly generated by items that are placed out of bounds. The sizes of those rows are controlled by `grid_auto_rows` property.
     ///
     /// <https://developer.mozilla.org/en-US/docs/Web/CSS/grid-template-rows>
+    #[cfg_attr(feature = "serialize", serde(default))]
     pub grid_template_rows: Vec<RepeatedGridTrack>,
 
     /// Defines the number of columns a grid has and the sizes of those columns. If grid items are given explicit placements then more columns may
     /// be implicitly generated by items that are placed out of bounds. The sizes of those columns are controlled by `grid_auto_columns` property.
     ///
     /// <https://developer.mozilla.org/en-US/docs/Web/CSS/grid-template-columns>
+    #[cfg_attr(feature = "serialize", serde(default))]
     pub grid_template_columns: Vec<RepeatedGridTrack>,
 
     /// Defines the size of implicitly created rows. Rows are created implicitly when grid items are given explicit placements that are out of bounds
     /// of the rows explicitly created using `grid_template_rows`.
     ///
     /// <https://developer.mozilla.org/en-US/docs/Web/CSS/grid-auto-rows>
+    #[cfg_attr(feature = "serialize", serde(default))]
     pub grid_auto_rows: Vec<GridTrack>,
     /// Defines the size of implicitly created columns. Columns are created implicitly when grid items are given explicit placements that are out of bounds
     /// of the columns explicitly created using `grid_template_columns`.
     ///
     /// <https://developer.mozilla.org/en-US/docs/Web/CSS/grid-auto-columns>
+    #[cfg_attr(feature = "serialize", serde(default))]
     pub grid_auto_columns: Vec<GridTrack>,
 
     /// The row in which a grid item starts and how many rows it spans.
     ///
     /// <https://developer.mozilla.org/en-US/docs/Web/CSS/grid-row>
+    #[cfg_attr(feature = "serialize", serde(default))]
     pub grid_row: GridPlacement,
 
     /// The column in which a grid item starts and how many columns it spans.
     ///
     /// <https://developer.mozilla.org/en-US/docs/Web/CSS/grid-column>
+    #[cfg_attr(feature = "serialize", serde(default))]
     pub grid_column: GridPlacement,
 }
 
