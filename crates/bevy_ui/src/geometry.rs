@@ -321,6 +321,7 @@ impl Val {
 #[cfg_attr(
     feature = "serialize",
     derive(serde::Serialize, serde::Deserialize),
+    serde(default),
     reflect(Serialize, Deserialize)
 )]
 pub struct UiRect {
