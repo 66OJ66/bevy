@@ -495,6 +495,7 @@ impl From<BVec2> for IgnoreScroll {
 #[cfg_attr(
     feature = "serialize",
     derive(serde::Serialize, serde::Deserialize),
+    serde(default),
     reflect(Serialize, Deserialize)
 )]
 pub struct Node {
