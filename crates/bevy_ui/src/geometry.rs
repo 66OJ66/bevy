@@ -562,7 +562,7 @@ pub fn vmax<T: ValNum>(value: T) -> Val {
 #[cfg_attr(
     feature = "serialize",
     derive(serde::Serialize, serde::Deserialize),
-    serde(default)
+    serde(default),
     reflect(Serialize, Deserialize)
 )]
 pub struct UiRect {
